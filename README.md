@@ -2,6 +2,7 @@
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-red)](https://arxiv.org/abs/2510.02340)
 [![Google Drive](https://img.shields.io/badge/Download-Google%20Drive-blue)](https://drive.google.com/drive/folders/1sJj_hTuHF0xNVcLTWSG9MVsD12Abv1tX?usp=sharing)
+[![Hugging Face](https://img.shields.io/badge/Dataset-HuggingFace-yellow)](https://huggingface.co/datasets/gxx27/time_unlearn)
 
 
 
@@ -105,6 +106,32 @@ time_unlearn/
 │   ├── semantic.json           # Semantic subset data files
 └── counterfactual/
     └── counterfactual.json     # Counterfactual subset data files
+```
+
+You can also download from the Hugging Face Hub (not recommended due to mixed `Cutoff year` types; prefer Google Drive above). If you still want to use the Hub, use this robust method that avoids type inference issues:
+
+```python
+from huggingface_hub import hf_hub_download
+from datasets import Dataset
+import json
+
+def load_time_unlearn_split(repo_id: str, filename: str, subfolder: str | None = None):
+    path = hf_hub_download(
+        repo_id=repo_id,
+        repo_type="dataset",
+        filename=filename,
+        subfolder=subfolder,
+        revision="main",
+    )
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    for ex in data:
+        ex["Cutoff year"] = str(ex.get("Cutoff year", ""))
+    return Dataset.from_list(data)
+
+factual = load_time_unlearn_split("gxx27/time_unlearn", "factual.json")
+semantic = load_time_unlearn_split("gxx27/time_unlearn", "semantic.json")
+counterfactual = load_time_unlearn_split("gxx27/time_unlearn", "counterfactual.json")
 ```
 
 ### 3. API Configuration
